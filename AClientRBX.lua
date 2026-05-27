@@ -322,7 +322,7 @@ crashBtn.MouseButton1Click:Connect(function()
                     
                     -- Обязательно автоматически удаляем блоки через 5 секунд, 
                     -- иначе ваш компьютер полностью зависнет или игра вылетит (Crash)
-                    game:GetService("Debris"):AddItem(part, 5)
+
                 end
             end
         end)
