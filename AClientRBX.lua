@@ -2,7 +2,8 @@
 -- ==========================================
 -- ЧАСТЬ 1: СОЗДАНИЕ ИНТЕРФЕЙСА (ОКНА МЕНЮ)
 -- ==========================================
-speedValue = 100
+local speedValue = 100
+local jumpValue = 10 -- Стандартная высота прыжка в метрах ~7.2
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MyControlMenu"
@@ -11,8 +12,9 @@ screenGui.ResetOnSpawn = false
 local player = game.Players.LocalPlayer
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
+-- УВЕЛИЧИЛИ ВЫСОТУ ОКНА ДО 330, чтобы поместились все элементы
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 170)
+frame.Size = UDim2.new(0, 200, 0, 330)
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.Active = true
@@ -26,7 +28,6 @@ title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 title.Parent = frame
 
-
 -- Переменные для отслеживания состояния кнопок
 local noclipActive = false
 local speedActive = false
@@ -36,7 +37,7 @@ local jumpActive = false
 -- ЧАСТЬ 2: ЛОГИКА И КНОПКИ
 -- ==========================================
 
--- --- КНОПКА 1: NOCLIP (Сквозь стены) ---
+-- --- КНОПКА 1: NOCLIP ---
 local noclipBtn = Instance.new("TextButton")
 noclipBtn.Size = UDim2.new(0, 180, 0, 40)
 noclipBtn.Position = UDim2.new(0, 10, 0, 45)
@@ -55,7 +56,6 @@ noclipBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Цикл для постоянного отключения коллизии
 game:GetService("RunService").Stepped:Connect(function()
     if noclipActive and player.Character then
         for _, part in ipairs(player.Character:GetDescendants()) do
@@ -66,53 +66,7 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
---Speed input
-local speedInput = Instance.new("TextBox")
-speedInput.Size = UDim2.new(0, 180, 0, 35)
-speedInput.Position = UDim2.new(0, 10, 0, 180) -- Размещаем ниже предыдущих кнопок
-speedInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedInput.TextSize = 16
-speedInput.Text = "100" -- Изначально поле пустое
-speedInput.PlaceholderText = "Скорость/Speed" -- Подсказка серого цвета
-speedInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-speedInput.Parent = frame
-
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 6)
-uiCorner.Parent = speedInput
-
-local player = game.Players.LocalPlayer
-
--- Слушаем, когда игрок завершит ввод текста и нажмет Enter
-speedInput.FocusLost:Connect(function(enterPressed)
-    -- Проверяем, что игрок нажал именно Enter, а не просто кликнул мимо поля
-    if enterPressed then
-        local text = speedInput.Text
-        speedValue = tonumber(text) -- Пробуем превратить текст в число
-        
-        -- Проверяем, корректное ли число ввел игрок
-        if speedValue then
-            local character = player.Character
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-            
-            if humanoid then
-                humanoid.WalkSpeed = speedValue -- Устанавливаем введенную скорость
-                speedInput.Text = "" -- Очищаем поле после успешного ввода
-                print("Скорость изменена на: " .. speedValue)
-            end
-        else
-            -- Если ввели буквы вместо цифр, выводим предупреждение
-            speedInput.Text = ""
-            speedInput.PlaceholderText = "Ошибка! Введите число"
-            speedInput.PlaceholderColor3 = Color3.fromRGB(255, 100, 100)
-        end
-    end
-end)
-
-
-
--- --- КНОПКА 2: SPEED (Скорость) ---
+-- --- КНОПКА 2: SPEED ---
 local speedBtn = Instance.new("TextButton")
 speedBtn.Size = UDim2.new(0, 180, 0, 40)
 speedBtn.Position = UDim2.new(0, 10, 0, 95)
@@ -137,74 +91,103 @@ speedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
---Jump
+-- ПОЛЕ ВВОДА СКОРОСТИ
+local speedInput = Instance.new("TextBox")
+speedInput.Size = UDim2.new(0, 180, 0, 35)
+speedInput.Position = UDim2.new(0, 10, 0, 145) -- Сдвинули выше
+speedInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedInput.TextSize = 16
+speedInput.Text = "100" 
+speedInput.PlaceholderText = "Скорость/Speed" 
+speedInput.Parent = frame
 
-local JumpInput = Instance.new("TextBox")
-JumpInput.Size = UDim2.new(0, 180, 0, 35)
-JumpInput.Position = UDim2.new(0, 10, 0, 230) -- Размещаем ниже предыдущих кнопок
-JumpInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-JumpInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-JumpInput.TextSize = 16
-JumpInput.Text = "100" -- Изначально поле пустое
-JumpInput.PlaceholderText = "Скорость/Speed" -- Подсказка серого цвета
-JumpInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-JumpInput.Parent = frame
+local uiCornerSpeed = Instance.new("UICorner")
+uiCornerSpeed.CornerRadius = UDim.new(0, 6)
+uiCornerSpeed.Parent = speedInput
 
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 6)
-uiCorner.Parent = speedInput
-
-local player = game.Players.LocalPlayer
-
--- Слушаем, когда игрок завершит ввод текста и нажмет Enter
-JumpInput.FocusLost:Connect(function(enterPressed)
-    -- Проверяем, что игрок нажал именно Enter, а не просто кликнул мимо поля
+speedInput.FocusLost:Connect(function(enterPressed)
     if enterPressed then
-        local text = JumpInput.Text
-        JumpHeig = tonumber(text) -- Пробуем превратить текст в число
+        local text = speedInput.Text
+        local parsedSpeed = tonumber(text)
         
-        -- Проверяем, корректное ли число ввел игрок
-        if speedValue then
+        if parsedSpeed then
+            speedValue = parsedSpeed
             local character = player.Character
             local humanoid = character and character:FindFirstChildOfClass("Humanoid")
             
-            if humanoid then
-                humanoid.jumpHeight = JumpHeig -- Устанавливаем введенную скорость
-                speedInput.Text = "" -- Очищаем поле после успешного ввода
-                print("Сила прыжка изменена на: " .. JumpHeig)
+            -- Если функция сейчас включена, сразу обновляем скорость персонажу
+            if humanoid and speedActive then
+                humanoid.WalkSpeed = speedValue
             end
+            print("Сохраненное значение скорости: " .. speedValue)
         else
-            -- Если ввели буквы вместо цифр, выводим предупреждение
             speedInput.Text = ""
-            speedInput.PlaceholderText = "Ошибка! Введите число"
-            speedInput.PlaceholderColor3 = Color3.fromRGB(255, 100, 100)
+            speedInput.PlaceholderText = "Ошибка! Число"
         end
     end
 end)
 
-
-
+-- --- КНОПКА 3: JUMP (ИСПРАВЛЕНО: привязана к jumpBtn) ---
 local jumpBtn = Instance.new("TextButton")
-noclipBtn.Size = UDim2.new(0, 180, 0, 40)
-noclipBtn.Position = UDim2.new(0, 10, 0, 45)
-noclipBtn.Text = "SuperJump: OFF"
-noclipBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-noclipBtn.Parent = frame
-speedBtn.MouseButton1Click:Connect(function()
-    jumpActive = not jumpHeight
-    local humoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+jumpBtn.Size = UDim2.new(0, 180, 0, 40)
+jumpBtn.Position = UDim2.new(0, 10, 0, 195) -- Новая позиция ниже скорости
+jumpBtn.Text = "SuperJump: OFF"
+jumpBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+jumpBtn.Parent = frame
+
+jumpBtn.MouseButton1Click:Connect(function()
+    jumpActive = not jumpActive
+    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
     
     if humanoid then
+        humanoid.UseJumpPower = false -- Принудительно включаем расчет высоты в метрах
         if jumpActive then
-            speedBtn.Text = "SuperJump: ON"
-            speedBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-            humanoid.jumpHeight = speedValue
+            jumpBtn.Text = "SuperJump: ON"
+            jumpBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+            humanoid.JumpHeight = jumpValue -- ИСПРАВЛЕНО: Заглавная буква
         else
-            speedBtn.Text = "SuperJump: OFF"
-            speedBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-            humanoid.WalkSpeed = 16 
+            jumpBtn.Text = "SuperJump: OFF"
+            jumpBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            humanoid.JumpHeight = 7.2 -- Стандартная высота
         end
     end
 end)
 
+-- ПОЛЕ ВВОДА ПРЫЖКА (ИСПРАВЛЕНО)
+local jumpInput = Instance.new("TextBox")
+jumpInput.Size = UDim2.new(0, 180, 0, 35)
+jumpInput.Position = UDim2.new(0, 10, 0, 245) -- Размещено корректно внутри рамки
+jumpInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+jumpInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpInput.TextSize = 16
+jumpInput.Text = "30" 
+jumpInput.PlaceholderText = "Высота прыжка" 
+jumpInput.Parent = frame
 
+local uiCornerJump = Instance.new("UICorner")
+uiCornerJump.CornerRadius = UDim.new(0, 6)
+uiCornerJump.Parent = jumpInput
+
+jumpInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local text = jumpInput.Text
+        local parsedJump = tonumber(text)
+        
+        if parsedJump then -- ИСПРАВЛЕНО: проверяем именно прыжок, а не скорость
+            jumpValue = parsedJump
+            local character = player.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+            
+            -- Если функция включена, сразу меняем высоту прыжка
+            if humanoid and jumpActive then
+                humanoid.UseJumpPower = false
+                humanoid.JumpHeight = jumpValue
+            end
+            print("Сохраненное значение высоты прыжка: " .. jumpValue)
+        else
+            jumpInput.Text = ""
+            jumpInput.PlaceholderText = "Ошибка! Число"
+        end
+    end
+end)
