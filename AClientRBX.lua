@@ -14,7 +14,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Главное окно
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 430)
+frame.Size = UDim2.new(0, 200, 0, 530) -- Увеличили высоту для новой кнопки
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.Active = true
@@ -32,6 +32,7 @@ title.Parent = frame
 local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 8)
 frameCorner.Parent = frame
+local espActive = false
 
 -- ==========================================
 -- КНОПКА СВЕРНУТЬ / РАЗВЕРНУТЬ (В ПРАВОМ ВЕРХНЕМ УГЛУ)
@@ -322,7 +323,7 @@ crashBtn.MouseButton1Click:Connect(function()
                     
                     -- Обязательно автоматически удаляем блоки через 5 секунд, 
                     -- иначе ваш компьютер полностью зависнет или игра вылетит (Crash)
-
+                    game:GetService("Debris"):AddItem(part, 5)
                 end
             end
         end)
@@ -332,5 +333,234 @@ crashBtn.MouseButton1Click:Connect(function()
         crashBtn.Text = "Crash: OFF"
         crashBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
         print("Стресс-тест остановлен, новые блоки больше не создаются")
+    end
+end)
+
+
+
+-- --- КНОПКА 6: ESP (Подсветка игроков) ---
+local espBtn = Instance.new("TextButton")
+espBtn.Size = UDim2.new(0, 180, 0, 40)
+espBtn.Position = UDim2.new(0, 10, 0, 395) -- Встает ровно под кнопку краша
+espBtn.Text = "ESP: OFF"
+espBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+espBtn.Font = Enum.Font.SourceSansBold
+espBtn.TextSize = 14
+espBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+espBtn.Parent = frame
+
+local uiCornerEsp = Instance.new("UICorner")
+uiCornerEsp.CornerRadius = UDim.new(0, 6)
+uiCornerEsp.Parent = espBtn
+
+-- Функция для добавления подсветки на одного конкретного игрока
+local function addHighlight(targetPlayer)
+    if targetPlayer == player then return end -- Себя не подсвечиваем
+    
+    -- Ждем, пока у игрока загрузится персонаж
+    local character = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
+    
+    -- Проверяем, нет ли уже подсветки, чтобы не создавать дубликаты
+    if character and not character:FindFirstChild("EspHighlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "EspHighlight"
+        highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Цвет заливки (Красный) [3]
+        highlight.FillTransparency = 0.5 -- Прозрачность заливки (от 0 до 1)
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- Цвет обводки (Белый) [3]
+        highlight.OutlineTransparency = 0 -- Обводка полностью видимая
+        highlight.Adornee = character
+        highlight.Parent = character
+    end
+end
+
+-- Функция для удаления подсветки у всех игроков
+local function removeHighlight()
+    for _, p in ipairs(game.Players:GetPlayers()) do
+        if p.Character then
+            local highlight = p.Character:FindFirstChild("EspHighlight")
+            if highlight then
+                highlight:Destroy() -- Удаляем объект подсветки
+            end
+        end
+    end
+end
+
+-- Переменная для хранения отслеживания новых игроков
+local playerAddedConnection = nil
+
+-- Логика работы кнопки
+espBtn.MouseButton1Click:Connect(function()
+    espActive = not espActive -- Переключаем true/false
+    
+    if espActive then
+        espBtn.Text = "ESP: ON"
+        espBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        
+        -- 1. Подсвечиваем всех игроков, которые СЕЙЧАС есть на сервере
+        for _, p in ipairs(game.Players:GetPlayers()) do
+            task.spawn(function()
+                addHighlight(p)
+            end)
+            -- Если игрок возродится после смерти, подсвечиваем заново
+            p.CharacterAdded:Connect(addHighlight)
+        end
+        
+        -- 2. Отслеживаем НОВЫХ игроков, которые только заходят на сервер
+        playerAddedConnection = game.Players.PlayerAdded:Connect(function(newPlayer)
+            newPlayer.CharacterAdded:Connect(addHighlight)
+        end)
+        
+        print("Подсветка игроков включена")
+    else
+        espBtn.Text = "ESP: OFF"
+        espBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        
+        -- Отключаем отслеживание новых игроков
+        if playerAddedConnection then
+            playerAddedConnection:Disconnect()
+            playerAddedConnection = nil
+        end
+        
+        -- Удаляем всю текущую подсветку в игре
+        removeHighlight()
+        print("Подсветка игроков выключена")
+    end
+end)
+
+
+-- Переменные для работы полёта
+local flyActive = false
+local flySpeed = 50 -- Скорость полёта
+
+-- Объекты физики (создаются при включении)
+local flyVelocity = nil
+local flyOrientation = nil
+local flyAttachment = nil
+local flyConnection = nil
+
+-- --- КНОПКА 7: FLY (Полёт) ---
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(0, 180, 0, 40)
+flyBtn.Position = UDim2.new(0, 10, 0, 445) -- Позиция ровно под кнопкой ESP
+flyBtn.Text = "Fly: OFF"
+flyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+flyBtn.Font = Enum.Font.SourceSansBold
+flyBtn.TextSize = 14
+flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyBtn.Parent = frame
+
+local uiCornerFly = Instance.new("UICorner")
+uiCornerFly.CornerRadius = UDim.new(0, 6)
+uiCornerFly.Parent = flyBtn
+
+-- Сервисы для отслеживания ввода и камеры
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local camera = workspace.CurrentCamera
+
+-- Функция отключения полёта и удаления физических объектов
+local function disableFly()
+    if flyConnection then flyConnection:Disconnect() flyConnection = nil end
+    if flyVelocity then flyVelocity:Destroy() flyVelocity = nil end
+    if flyOrientation then flyOrientation:Destroy() flyOrientation = nil end
+    if flyAttachment then flyAttachment:Destroy() flyAttachment = nil end
+    
+    -- Возвращаем персонажу обычную анимацию падения/стояния
+    local character = player.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+    end
+end
+
+-- Логика работы кнопки
+flyBtn.MouseButton1Click:Connect(function()
+    flyActive = not flyActive
+    
+    if flyActive then
+        flyBtn.Text = "Fly: ON"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        
+        local character = player.Character
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        
+        if rootPart and humanoid then
+            -- Создаем точку крепления физики (Attachment)
+            flyAttachment = Instance.new("Attachment")
+            flyAttachment.Parent = rootPart
+            
+            -- Настраиваем удерживание направления (чтобы не падать лицом в пол)
+            flyOrientation = Instance.new("AlignOrientation")
+            flyOrientation.Mode = Enum.OrientationMode.OneAttachment
+            flyOrientation.Attachment0 = flyAttachment
+            flyOrientation.RigidityEnabled = true
+            flyOrientation.Parent = rootPart
+            
+            -- Настраиваем вектор скорости для перемещения (LinearVelocity)
+            flyVelocity = Instance.new("LinearVelocity")
+            flyVelocity.Mode = Enum.LinearVelocityMode.ForceLimitMode
+            flyVelocity.Attachment0 = flyAttachment
+            flyVelocity.MaxForce = math.huge -- Бесконечная сила для удержания веса
+            flyVelocity.VectorVelocity = Vector3.new(0, 0, 0)
+            flyVelocity.Parent = rootPart
+            
+            -- Переводим гуманоида в режим полёта (отключает стандартную физику ходьбы)
+            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+            
+            -- Цикл, который рассчитывает куда лететь каждый кадр
+            flyConnection = RunService.RenderStepped:Connect(function()
+                if not rootPart or not flyVelocity then return end
+                
+                -- Проверяем, какие клавиши зажаты игроком
+                local moveDirection = Vector3.new(0, 0, 0)
+                
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection = moveDirection + camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection = moveDirection - camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection = moveDirection - camera.CFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection = moveDirection + camera.CFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    moveDirection = moveDirection + Vector3.new(0, 1, 0) -- Вверх на пробел
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    moveDirection = moveDirection - Vector3.new(0, 1, 0) -- Вниз на Shift
+                end
+                
+                -- Если направление выбрано, двигаем персонажа туда
+                if moveDirection.Magnitude > 0 then
+                    flyVelocity.VectorVelocity = moveDirection.Unit * flySpeed
+                else
+                    flyVelocity.VectorVelocity = Vector3.new(0, 0, 0) -- Зависаем на месте
+                end
+                
+                -- Поворачиваем персонажа лицом туда, куда смотрит камера (горизонтально)
+                local camLook = camera.CFrame.LookVector
+                flyOrientation.CFrame = CFrame.lookAt(Vector3.new(0,0,0), Vector3.new(camLook.X, 0, camLook.Z))
+            end)
+        end
+        print("Режим полёта активирован. Управление: W/A/S/D + Пробел/Shift")
+    else
+        flyBtn.Text = "Fly: OFF"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        disableFly()
+        print("Режим полёта выключен")
+    end
+end)
+
+-- Безопасность: если персонаж умер во время полета, очищаем физику
+player.CharacterRemoving:Connect(function()
+    if flyActive then
+        flyActive = false
+        flyBtn.Text = "Fly: OFF"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        disableFly()
     end
 end)
