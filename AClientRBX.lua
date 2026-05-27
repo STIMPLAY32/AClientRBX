@@ -2,6 +2,8 @@
 -- ==========================================
 -- ЧАСТЬ 1: СОЗДАНИЕ ИНТЕРФЕЙСА (ОКНА МЕНЮ)
 -- ==========================================
+speedValue = 100
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MyControlMenu"
 screenGui.ResetOnSpawn = false 
@@ -63,6 +65,7 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
+--Speed input
 local speedInput = Instance.new("TextBox")
 speedInput.Size = UDim2.new(0, 180, 0, 35)
 speedInput.Position = UDim2.new(0, 10, 0, 145) -- Размещаем ниже предыдущих кнопок
@@ -73,6 +76,40 @@ speedInput.Text = "100" -- Изначально поле пустое
 speedInput.PlaceholderText = "Введите скорость (например, 50)" -- Подсказка серого цвета
 speedInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 speedInput.Parent = frame
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 6)
+uiCorner.Parent = speedInput
+
+local player = game.Players.LocalPlayer
+
+-- Слушаем, когда игрок завершит ввод текста и нажмет Enter
+speedInput.FocusLost:Connect(function(enterPressed)
+    -- Проверяем, что игрок нажал именно Enter, а не просто кликнул мимо поля
+    if enterPressed then
+        local text = speedInput.Text
+        speedValue = tonumber(text) -- Пробуем превратить текст в число
+        
+        -- Проверяем, корректное ли число ввел игрок
+        if speedValue then
+            local character = player.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+            
+            if humanoid then
+                humanoid.WalkSpeed = speedValue -- Устанавливаем введенную скорость
+                speedInput.Text = "" -- Очищаем поле после успешного ввода
+                print("Скорость изменена на: " .. speedValue)
+            end
+        else
+            -- Если ввели буквы вместо цифр, выводим предупреждение
+            speedInput.Text = ""
+            speedInput.PlaceholderText = "Ошибка! Введите число"
+            speedInput.PlaceholderColor3 = Color3.fromRGB(255, 100, 100)
+        end
+    end
+end)
+
+
 
 -- --- КНОПКА 2: SPEED (Скорость) ---
 local speedBtn = Instance.new("TextButton")
@@ -90,7 +127,7 @@ speedBtn.MouseButton1Click:Connect(function()
         if speedActive then
             speedBtn.Text = "Speed: ON"
             speedBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-            humanoid.WalkSpeed = speedInput 
+            humanoid.WalkSpeed = speedValue
         else
             speedBtn.Text = "Speed: OFF"
             speedBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
