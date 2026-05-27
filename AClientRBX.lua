@@ -14,7 +14,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Главное окно
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 700, 0, 430)
+frame.Size = UDim2.new(0, 200, 0, 430)
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.Active = true
@@ -244,7 +244,7 @@ local gravityActive = false
 -- --- КНОПКА 4: LOW GRAVITY (Пониженная гравитация) ---
 local gravityBtn = Instance.new("TextButton")
 gravityBtn.Size = UDim2.new(0, 180, 0, 40)
-gravityBtn.Position = UDim2.new(0, 60, 0, 40) -- Встает ровно под поле ввода прыжка
+gravityBtn.Position = UDim2.new(0, 10, 0, 295) -- Встает ровно под поле ввода прыжка
 gravityBtn.Text = "Low Gravity: OFF"
 gravityBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 gravityBtn.Font = Enum.Font.SourceSansBold
@@ -280,10 +280,11 @@ end)
 
 
 
--- --- КНОПКА 4: LOW GRAVITY (Пониженная гравитация) ---
+-- --- КНОПКА 5: CRASH/STRESS TEST (ИСПРАВЛЕНО) ---
 local crashBtn = Instance.new("TextButton")
 crashBtn.Size = UDim2.new(0, 180, 0, 40)
-crashBtn.Position = UDim2.new(0, 60, 0, 100) -- Встает ровно под поле ввода прыжка
+-- Сдвинули по координате X на 10, чтобы кнопка стояла ровно по центру, как и остальные
+crashBtn.Position = UDim2.new(0, 10, 0, 345) 
 crashBtn.Text = "Crash: OFF"
 crashBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 crashBtn.Font = Enum.Font.SourceSansBold
@@ -291,34 +292,45 @@ crashBtn.TextSize = 14
 crashBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 crashBtn.Parent = frame
 
--- Скругляем углы новой кнопки
 local uiCornerCrash = Instance.new("UICorner")
 uiCornerCrash.CornerRadius = UDim.new(0, 6)
 uiCornerCrash.Parent = crashBtn
 
--- Логика работы кнопки гравитации
+-- Логика работы стресс-теста
 crashBtn.MouseButton1Click:Connect(function()
-    if crashactive then
-        crashactive = true
+    crashActive = not crashActive -- Переключаем состояние true / false
+    
+    if crashActive then
         crashBtn.Text = "Crash: ON"
         crashBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-        -- Устанавливаем низкую гравитацию (стандартная в Roblox: 196.2)
-        while true do
-            task.wait(0.5) -- Каждые полсекунды
-    
-            for i = 1, 50 do -- Спавним сразу по 50 блоков за раз
-                local part = Instance.new("Part")
-                part.Size = Vector3.new(4, 4, 4)
-                -- Случайное появление в небе над центром карты
-                part.Position = Vector3.new(math.random(-50, 50), 100, math.random(-50, 50)) 
-                part.Material = Enum.Material.Concrete -- Тяжелый материал
-                part.Parent = Workspace
+        
+        -- task.spawn запускает цикл в отдельном потоке, чтобы кнопка не намертво зависала
+        task.spawn(function()
+            -- Цикл работает только ПОКА переменная crashActive равна true
+            while crashActive do
+                task.wait(0.3) -- Небольшая пауза между волнами спавна
+                
+                -- Спавним блоки локально
+                for i = 1, 30 do
+                    if not crashActive then break end -- Мгновенная остановка, если кнопку выключили
+                    
+                    local part = Instance.new("Part")
+                    part.Size = Vector3.new(4, 4, 4)
+                    part.Position = Vector3.new(math.random(-50, 50), 50, math.random(-50, 50)) 
+                    part.Material = Enum.Material.Concrete
+                    part.Parent = workspace -- Исправлено на строчную букву
+                    
+                    -- Обязательно автоматически удаляем блоки через 5 секунд, 
+                    -- иначе ваш компьютер полностью зависнет или игра вылетит (Crash)
+                    game:GetService("Debris"):AddItem(part, 5)
+                end
             end
-        end
+        end)
+        
     else
+        -- Логика выключения
         crashBtn.Text = "Crash: OFF"
         crashBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        game:GetService("Debris"):AddItem(part, 1)
-
+        print("Стресс-тест остановлен, новые блоки больше не создаются")
     end
 end)
