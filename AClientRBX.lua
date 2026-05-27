@@ -14,7 +14,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Главное окно
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 330)
+frame.Size = UDim2.new(0, 200, 0, 430)
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.Active = true
@@ -77,6 +77,7 @@ end)
 local noclipActive = false
 local speedActive = false
 local jumpActive = false
+crashactive = false
 
 -- ==========================================
 -- ЧАСТЬ 2: ЛОГИКА И КНОПКИ ФУНКЦИЙ
@@ -198,6 +199,8 @@ jumpBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+
+
 -- ПОЛЕ ВВОДА ПРЫЖКА
 local jumpInput = Instance.new("TextBox")
 jumpInput.Size = UDim2.new(0, 180, 0, 35)
@@ -232,5 +235,90 @@ jumpInput.FocusLost:Connect(function(enterPressed)
             jumpInput.Text = ""
             jumpInput.PlaceholderText = "Ошибка! Число"
         end
+    end
+end)
+
+
+local gravityActive = false
+
+-- --- КНОПКА 4: LOW GRAVITY (Пониженная гравитация) ---
+local gravityBtn = Instance.new("TextButton")
+gravityBtn.Size = UDim2.new(0, 180, 0, 40)
+gravityBtn.Position = UDim2.new(0, 10, 0, 295) -- Встает ровно под поле ввода прыжка
+gravityBtn.Text = "Low Gravity: OFF"
+gravityBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+gravityBtn.Font = Enum.Font.SourceSansBold
+gravityBtn.TextSize = 14
+gravityBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+gravityBtn.Parent = frame
+
+-- Скругляем углы новой кнопки
+local uiCornerGravity = Instance.new("UICorner")
+uiCornerGravity.CornerRadius = UDim.new(0, 6)
+uiCornerGravity.Parent = gravityBtn
+
+-- Логика работы кнопки гравитации
+gravityBtn.MouseButton1Click:Connect(function()
+    gravityActive = not gravityActive
+    
+    if gravityActive then
+        gravityBtn.Text = "Low Gravity: ON"
+        gravityBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        
+        -- Устанавливаем низкую гравитацию (стандартная в Roblox: 196.2)
+        workspace.Gravity = 50 
+        print("Гравитация снижена")
+    else
+        gravityBtn.Text = "Low Gravity: OFF"
+        gravityBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        
+        -- Возвращаем стандартную гравитацию игры
+        workspace.Gravity = 196.2 
+        print("Гравитация восстановлена")
+    end
+end)
+
+
+
+-- --- КНОПКА 4: LOW GRAVITY (Пониженная гравитация) ---
+local crashBtn = Instance.new("TextButton")
+crashBtn.Size = UDim2.new(0, 180, 0, 40)
+crashBtn.Position = UDim2.new(0, 10, 0, 295) -- Встает ровно под поле ввода прыжка
+crashBtn.Text = "Low Gravity: OFF"
+crashBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+crashBtn.Font = Enum.Font.SourceSansBold
+crashBtn.TextSize = 14
+crashBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+crashBtn.Parent = frame
+
+-- Скругляем углы новой кнопки
+local uiCornerCrash = Instance.new("UICorner")
+uiCornerCrash.CornerRadius = UDim.new(0, 6)
+uiCornerCrash.Parent = crashBtn
+
+-- Логика работы кнопки гравитации
+crashBtn.MouseButton1Click:Connect(function()
+    if crashactive then
+        crashactive = true
+        crashBtn.Text = "Crash: ON"
+        crashBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        -- Устанавливаем низкую гравитацию (стандартная в Roblox: 196.2)
+        while true do
+            task.wait(0.5) -- Каждые полсекунды
+    
+            for i = 1, 50 do -- Спавним сразу по 50 блоков за раз
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(4, 4, 4)
+                -- Случайное появление в небе над центром карты
+                part.Position = Vector3.new(math.random(-50, 50), 100, math.random(-50, 50)) 
+                part.Material = Enum.Material.Concrete -- Тяжелый материал
+                part.Parent = Workspace
+            end
+        end
+    else
+        crashBtn.Text = "Crash: OFF"
+        gravcrashBtnityBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        game:GetService("Debris"):AddItem(part, 1)
+
     end
 end)
