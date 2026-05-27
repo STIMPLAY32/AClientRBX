@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 -- ==========================================
 -- ЧАСТЬ 1: СОЗДАНИЕ ИНТЕРФЕЙСА (ОКНА МЕНЮ)
 -- ==========================================
@@ -22,6 +23,7 @@ title.Text = "Control Panel"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 title.Parent = frame
+
 
 -- Переменные для отслеживания состояния кнопок
 local noclipActive = false
@@ -61,6 +63,17 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
+local speedInput = Instance.new("TextBox")
+speedInput.Size = UDim2.new(0, 180, 0, 35)
+speedInput.Position = UDim2.new(0, 10, 0, 145) -- Размещаем ниже предыдущих кнопок
+speedInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedInput.TextSize = 16
+speedInput.Text = "100" -- Изначально поле пустое
+speedInput.PlaceholderText = "Введите скорость (например, 50)" -- Подсказка серого цвета
+speedInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+speedInput.Parent = frame
+
 -- --- КНОПКА 2: SPEED (Скорость) ---
 local speedBtn = Instance.new("TextButton")
 speedBtn.Size = UDim2.new(0, 180, 0, 40)
@@ -77,7 +90,7 @@ speedBtn.MouseButton1Click:Connect(function()
         if speedActive then
             speedBtn.Text = "Speed: ON"
             speedBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-            humanoid.WalkSpeed = 100 
+            humanoid.WalkSpeed = speedInput 
         else
             speedBtn.Text = "Speed: OFF"
             speedBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -85,3 +98,5 @@ speedBtn.MouseButton1Click:Connect(function()
         end
     end
 end)
+
+--
