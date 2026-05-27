@@ -244,7 +244,7 @@ local gravityActive = false
 -- --- КНОПКА 4: LOW GRAVITY (Пониженная гравитация) ---
 local gravityBtn = Instance.new("TextButton")
 gravityBtn.Size = UDim2.new(0, 180, 0, 40)
-gravityBtn.Position = UDim2.new(0, 10, 0, 295) -- Встает ровно под поле ввода прыжка
+gravityBtn.Position = UDim2.new(0, 60, 0, 40) -- Встает ровно под поле ввода прыжка
 gravityBtn.Text = "Low Gravity: OFF"
 gravityBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 gravityBtn.Font = Enum.Font.SourceSansBold
@@ -283,8 +283,8 @@ end)
 -- --- КНОПКА 4: LOW GRAVITY (Пониженная гравитация) ---
 local crashBtn = Instance.new("TextButton")
 crashBtn.Size = UDim2.new(0, 180, 0, 40)
-crashBtn.Position = UDim2.new(0, 10, 0, 295) -- Встает ровно под поле ввода прыжка
-crashBtn.Text = "Low Gravity: OFF"
+crashBtn.Position = UDim2.new(0, 60, 0, 100) -- Встает ровно под поле ввода прыжка
+crashBtn.Text = "Crash: OFF"
 crashBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 crashBtn.Font = Enum.Font.SourceSansBold
 crashBtn.TextSize = 14
