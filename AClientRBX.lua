@@ -34,31 +34,42 @@ frameCorner.CornerRadius = UDim.new(0, 8)
 frameCorner.Parent = frame
 
 -- ==========================================
--- КНОПКА СВЕРНУТЬ / РАЗВЕРНУТЬ (TOGGLE GUI)
+-- КНОПКА СВЕРНУТЬ / РАЗВЕРНУТЬ (В ПРАВОМ ВЕРХНЕМ УГЛУ)
 -- ==========================================
 local toggleGuiBtn = Instance.new("TextButton")
-toggleGuiBtn.Size = UDim2.new(0, 80, 0, 30)
--- Размещаем кнопку отдельно в углу экрана, чтобы она не пропадала вместе с frame
-toggleGuiBtn.Position = UDim2.new(0, 20, 0, 360) 
-toggleGuiBtn.Text = "Hide Menu"
-toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+toggleGuiBtn.Size = UDim2.new(0, 100, 0, 35) -- Чуть увеличили размер
+
+-- ИСПРАВЛЕНО: Позиционируем в правый верхний угол (отступ 50px от правого края и 20px сверху)
+toggleGuiBtn.Position = UDim2.new(1, -120, 0, 20) 
+
+toggleGuiBtn.Text = "Скрыть панель"
+toggleGuiBtn.TextSize = 14
+toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Серый цвет по умолчанию
 toggleGuiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleGuiBtn.Font = Enum.Font.SourceSansBold
 toggleGuiBtn.Parent = screenGui
 
+-- Скругление углов
 local toggleCorner = Instance.new("UICorner")
 toggleCorner.CornerRadius = UDim.new(0, 6)
 toggleCorner.Parent = toggleGuiBtn
 
+-- Обводка, чтобы кнопка выделялась на любом фоне
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(255, 255, 255)
+uiStroke.Thickness = 1
+uiStroke.Parent = toggleGuiBtn
+
 -- Логика скрытия панели
 toggleGuiBtn.MouseButton1Click:Connect(function()
-    frame.Visible = not frame.Visible -- Переключаем видимость (true/false)
+    frame.Visible = not frame.Visible -- Переключаем видимость
     
     if frame.Visible then
-        toggleGuiBtn.Text = "Hide Menu"
-        toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        toggleGuiBtn.Text = "Скрыть панель"
+        toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     else
-        toggleGuiBtn.Text = "Show Menu"
-        toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(30, 140, 30) -- Подсветим зеленым, когда скрыто
+        toggleGuiBtn.Text = "Показать панель"
+        toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 100) -- Ярко-зеленый, когда скрыто
     end
 end)
 
