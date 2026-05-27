@@ -14,7 +14,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Главное окно
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 430)
+frame.Size = UDim2.new(0, 700, 0, 430)
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.Active = true
@@ -317,7 +317,7 @@ crashBtn.MouseButton1Click:Connect(function()
         end
     else
         crashBtn.Text = "Crash: OFF"
-        gravcrashBtnityBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        crashBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
         game:GetService("Debris"):AddItem(part, 1)
 
     end
