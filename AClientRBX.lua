@@ -73,7 +73,7 @@ speedInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 speedInput.TextSize = 16
 speedInput.Text = "100" -- Изначально поле пустое
-speedInput.PlaceholderText = "Введите скорость (например, 50)" -- Подсказка серого цвета
+speedInput.PlaceholderText = "Скорость/Speed" -- Подсказка серого цвета
 speedInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 speedInput.Parent = frame
 
