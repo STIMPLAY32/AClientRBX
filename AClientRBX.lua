@@ -3,7 +3,7 @@
 -- ЧАСТЬ 1: СОЗДАНИЕ ИНТЕРФЕЙСА (ОКНА МЕНЮ)
 -- ==========================================
 local speedValue = 100
-local jumpValue = 10 -- Стандартная высота прыжка в метрах ~7.2
+local jumpValue = 10 
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MyControlMenu"
@@ -12,7 +12,7 @@ screenGui.ResetOnSpawn = false
 local player = game.Players.LocalPlayer
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- УВЕЛИЧИЛИ ВЫСОТУ ОКНА ДО 330, чтобы поместились все элементы
+-- Главное окно
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 200, 0, 330)
 frame.Position = UDim2.new(0, 20, 0, 20)
@@ -28,13 +28,47 @@ title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 title.Parent = frame
 
--- Переменные для отслеживания состояния кнопок
+-- Скруглим углы главному меню для красоты
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 8)
+frameCorner.Parent = frame
+
+-- ==========================================
+-- КНОПКА СВЕРНУТЬ / РАЗВЕРНУТЬ (TOGGLE GUI)
+-- ==========================================
+local toggleGuiBtn = Instance.new("TextButton")
+toggleGuiBtn.Size = UDim2.new(0, 80, 0, 30)
+-- Размещаем кнопку отдельно в углу экрана, чтобы она не пропадала вместе с frame
+toggleGuiBtn.Position = UDim2.new(0, 20, 0, 360) 
+toggleGuiBtn.Text = "Hide Menu"
+toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+toggleGuiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleGuiBtn.Parent = screenGui
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 6)
+toggleCorner.Parent = toggleGuiBtn
+
+-- Логика скрытия панели
+toggleGuiBtn.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible -- Переключаем видимость (true/false)
+    
+    if frame.Visible then
+        toggleGuiBtn.Text = "Hide Menu"
+        toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    else
+        toggleGuiBtn.Text = "Show Menu"
+        toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(30, 140, 30) -- Подсветим зеленым, когда скрыто
+    end
+end)
+
+-- Переменные для отслеживания состояния функций игры
 local noclipActive = false
 local speedActive = false
 local jumpActive = false
 
 -- ==========================================
--- ЧАСТЬ 2: ЛОГИКА И КНОПКИ
+-- ЧАСТЬ 2: ЛОГИКА И КНОПКИ ФУНКЦИЙ
 -- ==========================================
 
 -- --- КНОПКА 1: NOCLIP ---
@@ -94,7 +128,7 @@ end)
 -- ПОЛЕ ВВОДА СКОРОСТИ
 local speedInput = Instance.new("TextBox")
 speedInput.Size = UDim2.new(0, 180, 0, 35)
-speedInput.Position = UDim2.new(0, 10, 0, 145) -- Сдвинули выше
+speedInput.Position = UDim2.new(0, 10, 0, 145) 
 speedInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 speedInput.TextSize = 16
@@ -116,7 +150,6 @@ speedInput.FocusLost:Connect(function(enterPressed)
             local character = player.Character
             local humanoid = character and character:FindFirstChildOfClass("Humanoid")
             
-            -- Если функция сейчас включена, сразу обновляем скорость персонажу
             if humanoid and speedActive then
                 humanoid.WalkSpeed = speedValue
             end
@@ -128,10 +161,10 @@ speedInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- --- КНОПКА 3: JUMP (ИСПРАВЛЕНО: привязана к jumpBtn) ---
+-- --- КНОПКА 3: JUMP ---
 local jumpBtn = Instance.new("TextButton")
 jumpBtn.Size = UDim2.new(0, 180, 0, 40)
-jumpBtn.Position = UDim2.new(0, 10, 0, 195) -- Новая позиция ниже скорости
+jumpBtn.Position = UDim2.new(0, 10, 0, 195) 
 jumpBtn.Text = "SuperJump: OFF"
 jumpBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 jumpBtn.Parent = frame
@@ -141,23 +174,23 @@ jumpBtn.MouseButton1Click:Connect(function()
     local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
     
     if humanoid then
-        humanoid.UseJumpPower = false -- Принудительно включаем расчет высоты в метрах
+        humanoid.UseJumpPower = false 
         if jumpActive then
             jumpBtn.Text = "SuperJump: ON"
             jumpBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-            humanoid.JumpHeight = jumpValue -- ИСПРАВЛЕНО: Заглавная буква
+            humanoid.JumpHeight = jumpValue 
         else
             jumpBtn.Text = "SuperJump: OFF"
             jumpBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-            humanoid.JumpHeight = 7.2 -- Стандартная высота
+            humanoid.JumpHeight = 7.2 
         end
     end
 end)
 
--- ПОЛЕ ВВОДА ПРЫЖКА (ИСПРАВЛЕНО)
+-- ПОЛЕ ВВОДА ПРЫЖКА
 local jumpInput = Instance.new("TextBox")
 jumpInput.Size = UDim2.new(0, 180, 0, 35)
-jumpInput.Position = UDim2.new(0, 10, 0, 245) -- Размещено корректно внутри рамки
+jumpInput.Position = UDim2.new(0, 10, 0, 245) 
 jumpInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 jumpInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 jumpInput.TextSize = 16
@@ -174,12 +207,11 @@ jumpInput.FocusLost:Connect(function(enterPressed)
         local text = jumpInput.Text
         local parsedJump = tonumber(text)
         
-        if parsedJump then -- ИСПРАВЛЕНО: проверяем именно прыжок, а не скорость
+        if parsedJump then 
             jumpValue = parsedJump
             local character = player.Character
             local humanoid = character and character:FindFirstChildOfClass("Humanoid")
             
-            -- Если функция включена, сразу меняем высоту прыжка
             if humanoid and jumpActive then
                 humanoid.UseJumpPower = false
                 humanoid.JumpHeight = jumpValue
